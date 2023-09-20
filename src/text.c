@@ -569,18 +569,6 @@ print_progress(off_t cur, off_t prev, off_t total, double kbps)
 	}
 }
 
-static
-char
-alt_id(int n)
-{
-	const char *p = "09AZaz";
-	while (*p && n > p[1] - p[0]) {
-		n -= p[1] - p[0] + 1;
-		p += 2;
-	}
-	return *p ? *p + n : '*';
-}
-
 static void
 print_alternate_output_progress(axel_t *axel, char *progress, int width,
 				off_t done, off_t total,
@@ -596,7 +584,7 @@ print_alternate_output_progress(axel_t *axel, char *progress, int width,
 		if (axel->conn[i].currentbyte < axel->conn[i].lastbyte) {
 			if (now <= axel->conn[i].last_transfer
 				   + axel->conf->connection_timeout / 2) {
-				progress[offset] = alt_id(i);
+				progress[offset] = '.';
 			} else
 				progress[offset] = '#';
 		}
@@ -630,7 +618,7 @@ print_alternate_output(axel_t *axel)
 	if (!progress)
 		return;
 
-	memset(progress, '.', width);
+	memset(progress, '#', width);
 
 	if (total != LLONG_MAX) {
 		print_alternate_output_progress(axel, progress, width, done,
