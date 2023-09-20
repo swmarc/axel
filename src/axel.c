@@ -265,7 +265,7 @@ axel_open(axel_t *axel)
 	int i, fd;
 	ssize_t nread;
 
-	if (axel->conf->verbose > 0)
+	if (axel->conf->verbose >= 2)
 		axel_message(axel, _("Opening output file %s"), axel->filename);
 
 	axel->outfd = -1;
@@ -455,7 +455,7 @@ axel_start(axel_t *axel)
 			axel->conn[i].supported = true;
 	}
 
-	if (axel->conf->verbose > 0)
+	if (axel->conf->verbose >= 2)
 		axel_message(axel, _("Starting download"));
 
 	for (i = 0; i < axel->conf->num_connections; i++) {
@@ -575,7 +575,7 @@ axel_do(axel_t *axel)
 		}
 
 		if (size == 0) {
-			if (axel->conf->verbose) {
+			if (axel->conf->verbose >= 2) {
 				/* Only abnormal behaviour if: */
 				if (axel->conn[i].currentbyte <
 				    axel->conn[i].lastbyte &&
@@ -584,9 +584,9 @@ axel_do(axel_t *axel)
 						     _("Connection %i unexpectedly closed"),
 						     i);
 				} else {
-					axel_message(axel,
-						     _("Connection %i finished"),
-						     i);
+  			  axel_message(axel,
+				       _("Connection %i finished"),
+			  	     i);
 				}
 			}
 			if (!axel->conn[0].supported) {
@@ -600,7 +600,7 @@ axel_do(axel_t *axel)
 		/* remaining == Bytes to go */
 		remaining = axel->conn[i].lastbyte - axel->conn[i].currentbyte;
 		if (remaining < size) {
-			if (axel->conf->verbose) {
+			if (axel->conf->verbose >= 2) {
 				axel_message(axel, _("Connection %i finished"),
 					     i);
 			}
