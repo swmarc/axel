@@ -10,7 +10,7 @@ Copyright 2017      Vlad Glagolev
 This file is under the same license as Axel.
 ])
 
-AC_PREREQ([2.69])
+AC_PREREQ([2.72])
 PKG_PREREQ([0.29])
 m4_ifdef([AX_IS_RELEASE],, [
     m4_fatal([autoconf-archive is required])
@@ -34,7 +34,7 @@ AS_HELP_STRING(
 AS_HELP_STRING(
         [--without-ssl], [disable TLS support])],
     [AS_CASE(["$withval"],
-        [openssl|wolfssl|no],,
+        [openssl|wolfssl|yes|no],,
         [AC_MSG_ERROR([Invalid argument: --with-ssl=$withval])])],
     [with_ssl=openssl])
 
@@ -76,8 +76,7 @@ AC_USE_SYSTEM_EXTENSIONS
 
 # Compiler checks
 AC_PROG_CC
-AC_PROG_CC_C99
-AS_IF([test "x$ac_cv_prog_cc_c99" = "xno"], [
+AS_CASE([$ac_prog_cc_stdc], [no|c89], [
     AC_MSG_ERROR([C99 compiler required])
 ])
 
@@ -145,7 +144,16 @@ AC_TYPE_UINT64_T
 AC_TYPE_SIZE_T
 AC_TYPE_SSIZE_T
 AC_TYPE_MODE_T
-AC_TYPE_SIGNAL
+
+AC_CACHE_CHECK([return type of signal handlers],[ac_cv_type_signal],[AC_COMPILE_IFELSE(
+[AC_LANG_PROGRAM([#include <sys/types.h>
+#include <signal.h>
+], [return *(signal (0, 0)) (0) == 1;])],
+  [ac_cv_type_signal=int],
+  [ac_cv_type_signal=void])])
+AS_IF([test "x$ac_cv_type_signal" = xint], [
+  AC_MSG_ERROR([return type of signal handlers is not compliant with C89])
+])
 
 # Custom type checks and replacements
 AXEL_CHECK_TYPE([off_t], [sizeof(off_t) >= sizeof(int64_t)])
@@ -191,6 +199,7 @@ AC_REPLACE_FUNCS([ \
 AXEL_CHECK_MACRO([O_NONBLOCK], [fcntl.h])
 
 # Optional (but included-by-default) ssl support
+AS_IF([test "x$with_ssl" = xyes], [with_ssl=openssl])
 AM_CONDITIONAL([WITH_SSL], [test "x$with_ssl" != xno])
 AC_ARG_VAR([SSL_PREFIX], [installation prefix of the TLS/SSL library])
 AS_IF([test "x$with_ssl" != xno], [

@@ -123,6 +123,8 @@ main(int argc, char *argv[])
 	bindtextdomain(PACKAGE, LOCALEDIR);
 	textdomain(PACKAGE);
 #endif
+	if (axel_rnd_init() == -1)
+		return 1;
 
 	if (!conf_init(conf)) {
 		return 1;
@@ -324,9 +326,11 @@ main(int argc, char *argv[])
 		if (!search)
 			goto free_conf;
 
-		for (int i = 0; i < argc - optind; i++)
+		for (int i = 0; i < argc - optind; i++) {
 			strlcpy(search[i].url, argv[optind + i],
 				sizeof(search[i].url));
+			// FIXME check url here
+		}
 		axel = axel_new(conf, argc - optind, search);
 		free(search);
 		if (!axel || axel->ready == -1) {
@@ -468,7 +472,7 @@ main(int argc, char *argv[])
 }
 
 /* SIGINT/SIGTERM handler */
-RETSIGTYPE
+void
 stop(int signal)
 {
 	(void)signal;
@@ -734,8 +738,8 @@ print_version_info(void)
 	       "\t  2008-2010 Philipp Hagemeister,\n"
 	       "\t  2015-2017 Joao Eriberto Mota Filho,\n"
 	       "\t  2016-2017 Stephen Thirlwall,\n"
-	       "\t  2017      Ismael Luceno,\n"
 	       "\t  2017      Antonio Quartulli,\n"
+	       "\t  2017-2024 Ismael Luceno,\n"
 	       "\t\t    %s\n%s\n\n", _("and others."),
 	       _("Please, see the CREDITS file.\n\n"));
 }
